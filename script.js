@@ -26,11 +26,15 @@ let firstNum = "";
 let selectedOperator = "";
 let secondNum = "";
 let isSecondNum = false;
+let isError = false;
+let previousCalc = false;
+let firstHasDecimal = false;
+let secondHasDecimal = false;
 
 // Create a function called 'operate' that takes in an operator and two numbers and calls one of the operator functions
 function operate(firstNum, selectedOperator, secondNum) {
-  firstNum = parseInt(firstNum);
-  secondNum = parseInt(secondNum);
+  // firstNum = parseInt(firstNum);
+  // secondNum = parseInt(secondNum);
 
   if (selectedOperator === "+") {
     return addition(firstNum, secondNum);
@@ -144,6 +148,10 @@ let zero = document.createElement("button");
 zero.classList.add("digits");
 zero.textContent = "0";
 
+let decimal = document.createElement("button");
+decimal.classList.add("decimal");
+decimal.textContent = ".";
+
 digitContainer.append(
   one,
   two,
@@ -154,7 +162,8 @@ digitContainer.append(
   seven,
   eight,
   nine,
-  zero
+  zero,
+  decimal
 );
 
 // The Display Where Numbers and Solutions Will Be Presented
@@ -171,30 +180,81 @@ secondNumDiv.textContent = "";
 
 display.append(firstNumDiv, selectedOperatorDiv, secondNumDiv);
 
-// Event Listener For Selecting The Numbers
+// Event Listener For Selecting The Numbers and Decimals
 let digitsCollection = document.querySelectorAll(".digits");
 digitsCollection.forEach((digit) => {
   digit.addEventListener("click", () => {
+    if (isError) {
+      firstNumDiv.textContent = "";
+      selectedOperatorDiv.textContent = "";
+      secondNumDiv.textContent = "";
+      isError = false;
+    }
+
     if (!isSecondNum) {
+      if (previousCalc) {
+        firstNumDiv.textContent = "";
+        firstNum = null;
+        previousCalc = false;
+      }
       firstNumDiv.textContent += digit.textContent;
       firstNum = firstNumDiv.textContent;
-      console.log(firstNum);
     } else {
       secondNumDiv.textContent += digit.textContent;
       secondNum = secondNumDiv.textContent;
-      console.log(secondNum);
     }
   });
+});
+
+// Event Listener For Using Decimal Points
+decimal.addEventListener("click", () => {
+  if (isError || previousCalc) {
+    firstNumDiv.textContent = "0";
+    selectedOperatorDiv.textContent = "";
+    secondNumDiv.textContent = "";
+    isError = false;
+    previousCalc = false;
+  }
+
+  if (firstHasDecimal && !isSecondNum) {
+    return;
+  } else if (!isSecondNum) {
+    if (firstNumDiv.textContent === "") {
+      firstNumDiv.textContent = "0";
+    }
+    firstNumDiv.textContent += decimal.textContent;
+    firstNum = firstNumDiv.textContent;
+    firstHasDecimal = true;
+  } else if (secondHasDecimal) {
+    return;
+  } else {
+    if (secondNumDiv.textContent === "") {
+      secondNumDiv.textContent = "0";
+    }
+    secondNumDiv.textContent += decimal.textContent;
+    secondNum = secondNumDiv.textContent;
+    secondHasDecimal = true;
+  }
 });
 
 // Event Listener For Selecting The Operator
 let operatorCollection = document.querySelectorAll(".operator-button");
 operatorCollection.forEach((operator) => {
   operator.addEventListener("click", () => {
+    if (isError) {
+      firstNumDiv.textContent = "";
+      selectedOperatorDiv.textContent = "";
+      secondNumDiv.textContent = "";
+      isError = false;
+    }
+    if (!firstNum) {
+      isError = true;
+      firstNumDiv.textContent = "Invalid Format Used";
+      return;
+    }
     selectedOperatorDiv.textContent = operator.textContent;
     selectedOperator = selectedOperatorDiv.textContent;
     isSecondNum = true;
-    console.log(selectedOperator);
   });
 });
 
@@ -207,12 +267,17 @@ clearAll.addEventListener("click", () => {
   secondNumDiv.textContent = "";
   secondNum = null;
   isSecondNum = false;
+  firstHasDecimal = false;
+  secondHasDecimal = false;
 });
 
 clearEntry.addEventListener("click", () => {
   if (secondNum) {
     secondNumDiv.textContent = secondNumDiv.textContent.slice(0, -1);
     secondNum = secondNumDiv.textContent;
+    if (!secondNum.includes(".")) {
+      secondHasDecimal = false;
+    }
   } else if (selectedOperator) {
     selectedOperatorDiv.textContent = "";
     selectedOperator = null;
@@ -220,16 +285,54 @@ clearEntry.addEventListener("click", () => {
   } else {
     firstNumDiv.textContent = firstNumDiv.textContent.slice(0, -1);
     firstNum = firstNumDiv.textContent;
+    if (!firstNum.includes(".")) {
+      firstHasDecimal = false;
+    }
   }
 });
 
 // Event Listener For Solving User's Math Problem
 equalButton.addEventListener("click", () => {
-  firstNumDiv.textContent = `${operate(firstNum, selectedOperator, secondNum)}`;
+  if (secondNum === 0 && selectedOperator === "/") {
+    isError = true;
+    firstNumDiv.textContent = "You CANNOT Divide By Zero!";
+    firstNum = null;
+    selectedOperatorDiv.textContent = "";
+    selectedOperator = null;
+    secondNumDiv.textContent = "";
+    secondNum = null;
+    isSecondNum = false;
+    firstHasDecimal = false;
+    secondHasDecimal = false;
+    return;
+  } else if (!secondNum) {
+    isError = true;
+    firstNumDiv.textContent = "Invalid Format Used";
+    firstNum = null;
+    selectedOperatorDiv.textContent = "";
+    selectedOperator = null;
+    secondNumDiv.textContent = "";
+    secondNum = null;
+    isSecondNum = false;
+    firstHasDecimal = false;
+    secondHasDecimal = false;
+    return;
+  }
+
+  firstNum = Number(firstNum);
+  secondNum = Number(secondNum);
+
+  let solution =
+    Math.round(operate(firstNum, selectedOperator, secondNum) * 1000) / 1000;
+
+  firstNumDiv.textContent = `${solution}`;
   firstNum = firstNumDiv.textContent;
   selectedOperatorDiv.textContent = "";
   selectedOperator = null;
   secondNumDiv.textContent = "";
   secondNum = null;
   isSecondNum = false;
+  firstHasDecimal = false;
+  secondHasDecimal = false;
+  previousCalc = true;
 });
