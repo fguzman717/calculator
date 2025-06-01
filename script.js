@@ -1,6 +1,5 @@
 // The calculator will have the basic math operators (+,-,*,/)
 // These operations will be their own functions
-
 function addition(firstNum, secondNum) {
   let sum = firstNum + secondNum;
   return sum;
@@ -33,9 +32,6 @@ let secondHasDecimal = false;
 
 // Create a function called 'operate' that takes in an operator and two numbers and calls one of the operator functions
 function operate(firstNum, selectedOperator, secondNum) {
-  // firstNum = parseInt(firstNum);
-  // secondNum = parseInt(secondNum);
-
   if (selectedOperator === "+") {
     return addition(firstNum, secondNum);
   } else if (selectedOperator === "-") {
@@ -55,7 +51,7 @@ function operate(firstNum, selectedOperator, secondNum) {
 // * Clear button
 let body = document.querySelector("body");
 
-// Operators
+// Operators Buttons
 let operatorContainer = document.createElement("div");
 operatorContainer.setAttribute("id", "operator-container");
 body.append(operatorContainer);
@@ -103,68 +99,23 @@ clearEntry.textContent = "CE";
 
 clearContainer.append(clearAll, clearEntry);
 
-// Digits **** Try to refactor this with a loop for cleaner code ****
+// Buttons For The Digits and The Decimal
 let digitContainer = document.createElement("div");
 digitContainer.setAttribute("id", "digit-container");
 body.appendChild(digitContainer);
 
-let one = document.createElement("button");
-one.classList.add("digits");
-one.textContent = "1";
+const digits = "1234567890".split("");
+digits.forEach((digit) => {
+  const button = document.createElement("button");
+  button.classList.add("digits");
+  button.textContent = digit;
+  digitContainer.appendChild(button);
+});
 
-let two = document.createElement("button");
-two.classList.add("digits");
-two.textContent = "2";
-
-let three = document.createElement("button");
-three.classList.add("digits");
-three.textContent = "3";
-
-let four = document.createElement("button");
-four.classList.add("digits");
-four.textContent = "4";
-
-let five = document.createElement("button");
-five.classList.add("digits");
-five.textContent = "5";
-
-let six = document.createElement("button");
-six.classList.add("digits");
-six.textContent = "6";
-
-let seven = document.createElement("button");
-seven.classList.add("digits");
-seven.textContent = "7";
-
-let eight = document.createElement("button");
-eight.classList.add("digits");
-eight.textContent = "8";
-
-let nine = document.createElement("button");
-nine.classList.add("digits");
-nine.textContent = "9";
-
-let zero = document.createElement("button");
-zero.classList.add("digits");
-zero.textContent = "0";
-
-let decimal = document.createElement("button");
+const decimal = document.createElement("button");
 decimal.classList.add("decimal");
 decimal.textContent = ".";
-
-digitContainer.append(
-  one,
-  two,
-  three,
-  four,
-  five,
-  six,
-  seven,
-  eight,
-  nine,
-  zero,
-  decimal
-);
+digitContainer.appendChild(decimal);
 
 // The Display Where Numbers and Solutions Will Be Presented
 let display = document.createElement("div");
@@ -180,86 +131,80 @@ secondNumDiv.textContent = "";
 
 display.append(firstNumDiv, selectedOperatorDiv, secondNumDiv);
 
-// Event Listener For Selecting The Numbers and Decimals
-let digitsCollection = document.querySelectorAll(".digits");
-digitsCollection.forEach((digit) => {
-  digit.addEventListener("click", () => {
-    if (isError) {
+// Functions For Each Individual Event Handler
+function handleDigitEvent(digit) {
+  if (isError) {
+    firstNumDiv.textContent = "";
+    selectedOperatorDiv.textContent = "";
+    secondNumDiv.textContent = "";
+    isError = false;
+  }
+
+  if (!isSecondNum) {
+    if (previousCalc) {
       firstNumDiv.textContent = "";
-      selectedOperatorDiv.textContent = "";
-      secondNumDiv.textContent = "";
-      isError = false;
+      firstNum = null;
+      previousCalc = false;
     }
+    firstNumDiv.textContent += digit;
+    firstNum = firstNumDiv.textContent;
+  } else {
+    secondNumDiv.textContent += digit;
+    secondNum = secondNumDiv.textContent;
+  }
+}
 
-    if (!isSecondNum) {
-      if (previousCalc) {
-        firstNumDiv.textContent = "";
-        firstNum = null;
-        previousCalc = false;
-      }
-      firstNumDiv.textContent += digit.textContent;
-      firstNum = firstNumDiv.textContent;
-    } else {
-      secondNumDiv.textContent += digit.textContent;
-      secondNum = secondNumDiv.textContent;
-    }
-  });
-});
-
-// Event Listener For Using Decimal Points
-decimal.addEventListener("click", () => {
+function handleDecimalEvent(decimal) {
   if (isError || previousCalc) {
     firstNumDiv.textContent = "0";
     selectedOperatorDiv.textContent = "";
     secondNumDiv.textContent = "";
     isError = false;
     previousCalc = false;
+    firstHasDecimal = false;
+    secondHasDecimal = false;
   }
 
-  if (firstHasDecimal && !isSecondNum) {
+  let currentDiv = !isSecondNum ? firstNumDiv : secondNumDiv;
+  let currentHasDecimal = !isSecondNum ? firstHasDecimal : secondHasDecimal;
+
+  if (currentHasDecimal) {
     return;
-  } else if (!isSecondNum) {
-    if (firstNumDiv.textContent === "") {
-      firstNumDiv.textContent = "0";
-    }
-    firstNumDiv.textContent += decimal.textContent;
-    firstNum = firstNumDiv.textContent;
+  }
+
+  if (currentDiv.textContent === "") {
+    currentDiv.textContent = "0";
+  }
+
+  currentDiv.textContent += decimal;
+
+  if (!isSecondNum) {
+    firstNum = currentDiv.textContent;
     firstHasDecimal = true;
-  } else if (secondHasDecimal) {
-    return;
   } else {
-    if (secondNumDiv.textContent === "") {
-      secondNumDiv.textContent = "0";
-    }
-    secondNumDiv.textContent += decimal.textContent;
-    secondNum = secondNumDiv.textContent;
+    secondNum = currentDiv.textContent;
     secondHasDecimal = true;
   }
-});
+}
 
-// Event Listener For Selecting The Operator
-let operatorCollection = document.querySelectorAll(".operator-button");
-operatorCollection.forEach((operator) => {
-  operator.addEventListener("click", () => {
-    if (isError) {
-      firstNumDiv.textContent = "";
-      selectedOperatorDiv.textContent = "";
-      secondNumDiv.textContent = "";
-      isError = false;
-    }
-    if (!firstNum) {
-      isError = true;
-      firstNumDiv.textContent = "Invalid Format Used";
-      return;
-    }
-    selectedOperatorDiv.textContent = operator.textContent;
-    selectedOperator = selectedOperatorDiv.textContent;
-    isSecondNum = true;
-  });
-});
+function handleOperatorEvent(operator) {
+  if (isError) {
+    firstNumDiv.textContent = "";
+    selectedOperatorDiv.textContent = "";
+    secondNumDiv.textContent = "";
+    isError = false;
+  }
+  if (!firstNum) {
+    isError = true;
+    firstNumDiv.textContent = "Invalid Format Used";
+    return;
+  }
+  selectedOperatorDiv.textContent = operator;
+  selectedOperator = selectedOperatorDiv.textContent;
+  isSecondNum = true;
+}
 
-// Event Listeners For The Clear Buttons
-clearAll.addEventListener("click", () => {
+function handleClearAllEvent() {
   firstNumDiv.textContent = "";
   firstNum = null;
   selectedOperatorDiv.textContent = "";
@@ -269,9 +214,9 @@ clearAll.addEventListener("click", () => {
   isSecondNum = false;
   firstHasDecimal = false;
   secondHasDecimal = false;
-});
+}
 
-clearEntry.addEventListener("click", () => {
+function handleClearEntryEvent() {
   if (secondNum) {
     secondNumDiv.textContent = secondNumDiv.textContent.slice(0, -1);
     secondNum = secondNumDiv.textContent;
@@ -289,10 +234,12 @@ clearEntry.addEventListener("click", () => {
       firstHasDecimal = false;
     }
   }
-});
+}
 
-// Event Listener For Solving User's Math Problem
-equalButton.addEventListener("click", () => {
+function handleSolveEvent() {
+  firstNum = Number(firstNum);
+  secondNum = Number(secondNum);
+
   if (secondNum === 0 && selectedOperator === "/") {
     isError = true;
     firstNumDiv.textContent = "You CANNOT Divide By Zero!";
@@ -319,9 +266,6 @@ equalButton.addEventListener("click", () => {
     return;
   }
 
-  firstNum = Number(firstNum);
-  secondNum = Number(secondNum);
-
   let solution =
     Math.round(operate(firstNum, selectedOperator, secondNum) * 1000) / 1000;
 
@@ -335,4 +279,64 @@ equalButton.addEventListener("click", () => {
   firstHasDecimal = false;
   secondHasDecimal = false;
   previousCalc = true;
+}
+
+// Event Listener For Keyboard Inputs
+document.addEventListener("keydown", (event) => {
+  const digitKeys = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  const decimalKey = ".";
+  const operatorKeys = ["+", "-", "*", "/"];
+  const clearEntryKey = "Backspace";
+  const clearAllKey = "Escape";
+  const solveKey = ["=", "Enter"];
+
+  console.log(event.key);
+  if (digitKeys.includes(event.key)) {
+    handleDigitEvent(event.key);
+  } else if (decimalKey.includes(event.key)) {
+    handleDecimalEvent(event.key);
+  } else if (operatorKeys.includes(event.key)) {
+    handleOperatorEvent(event.key);
+  } else if (solveKey.includes(event.key)) {
+    handleSolveEvent();
+  } else if (clearAllKey.includes(event.key)) {
+    handleClearAllEvent();
+  } else if (clearEntryKey.includes(event.key)) {
+    handleClearEntryEvent();
+  }
+});
+
+// Event Listener For Selecting The Numbers and Decimals
+let digitsCollection = document.querySelectorAll(".digits");
+digitsCollection.forEach((digit) => {
+  digit.addEventListener("click", () => {
+    handleDigitEvent(digit.textContent);
+  });
+});
+
+// Event Listener For Using Decimal Points
+decimal.addEventListener("click", () => {
+  handleDecimalEvent(decimal.textContent);
+});
+
+// Event Listener For Selecting The Operator
+let operatorCollection = document.querySelectorAll(".operator-button");
+operatorCollection.forEach((operator) => {
+  operator.addEventListener("click", () => {
+    handleOperatorEvent(operator.textContent);
+  });
+});
+
+// Event Listeners For The Clear Buttons
+clearAll.addEventListener("click", () => {
+  handleClearAllEvent();
+});
+
+clearEntry.addEventListener("click", () => {
+  handleClearEntryEvent();
+});
+
+// Event Listener For Solving User's Math Problem
+equalButton.addEventListener("click", () => {
+  handleSolveEvent();
 });
