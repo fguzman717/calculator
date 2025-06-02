@@ -1,23 +1,19 @@
 // The calculator will have the basic math operators (+,-,*,/)
 // These operations will be their own functions
 function addition(firstNum, secondNum) {
-  let sum = firstNum + secondNum;
-  return sum;
+  return firstNum + secondNum;
 }
 
 function subtraction(firstNum, secondNum) {
-  let difference = firstNum - secondNum;
-  return difference;
+  return firstNum - secondNum;
 }
 
 function multiplication(firstNum, secondNum) {
-  let product = firstNum * secondNum;
-  return product;
+  return firstNum * secondNum;
 }
 
 function division(firstNum, secondNum) {
-  let quotient = firstNum / secondNum;
-  return quotient;
+  return firstNum / secondNum;
 }
 
 // A calculator operation will consist of 3 variables: The first number, the operator, and the second number (1 + 1)
@@ -27,11 +23,13 @@ let secondNum = "";
 let isSecondNum = false;
 let isError = false;
 let previousCalc = false;
-let firstHasDecimal = false;
-let secondHasDecimal = false;
+// let firstHasDecimal = false;
+// let secondHasDecimal = false;
 
 // Create a function called 'operate' that takes in an operator and two numbers and calls one of the operator functions
 function operate(firstNum, selectedOperator, secondNum) {
+  firstNum = Number(firstNum);
+  secondNum = Number(secondNum);
   if (selectedOperator === "+") {
     return addition(firstNum, secondNum);
   } else if (selectedOperator === "-") {
@@ -50,59 +48,53 @@ function operate(firstNum, selectedOperator, secondNum) {
 // * Digits
 // * Clear button
 let body = document.querySelector("body");
+let calculatorContainer = document.createElement("div");
+calculatorContainer.setAttribute("id", "calculator-container");
+body.appendChild(calculatorContainer);
 
-// Operators Buttons
-let operatorContainer = document.createElement("div");
-operatorContainer.setAttribute("id", "operator-container");
-body.append(operatorContainer);
+// The Display Where Numbers and Solutions Will Be Presented
+let display = document.createElement("div");
+display.setAttribute("id", "display");
+calculatorContainer.appendChild(display);
 
-let addButton = document.createElement("button");
-addButton.classList.add("operator-button");
-addButton.textContent = "+";
-
-let subtractButton = document.createElement("button");
-subtractButton.classList.add("operator-button");
-subtractButton.textContent = "-";
-
-let multiplyButton = document.createElement("button");
-multiplyButton.classList.add("operator-button");
-multiplyButton.textContent = "*";
-
-let divideButton = document.createElement("button");
-divideButton.classList.add("operator-button");
-divideButton.textContent = "/";
-
-let equalButton = document.createElement("button");
-equalButton.classList.add("solution-button");
-equalButton.textContent = "=";
-
-operatorContainer.append(
-  addButton,
-  subtractButton,
-  multiplyButton,
-  divideButton,
-  equalButton
-);
+let firstNumDiv = document.createElement("div");
+let selectedOperatorDiv = document.createElement("div");
+let secondNumDiv = document.createElement("div");
+display.append(firstNumDiv, selectedOperatorDiv, secondNumDiv);
 
 // Clear Buttons
 let clearContainer = document.createElement("div");
 clearContainer.setAttribute("id", "clear-container");
-body.appendChild(clearContainer);
+calculatorContainer.appendChild(clearContainer);
 
 let clearAll = document.createElement("button");
 clearAll.classList.add("clear-buttons");
-clearAll.textContent = "C";
+clearAll.textContent = "Clear All";
 
 let clearEntry = document.createElement("button");
 clearEntry.classList.add("clear-buttons");
-clearEntry.textContent = "CE";
+clearEntry.textContent = "Clear Entry";
 
 clearContainer.append(clearAll, clearEntry);
 
-// Buttons For The Digits and The Decimal
+// Operators Buttons
+let operatorContainer = document.createElement("div");
+operatorContainer.setAttribute("id", "operator-container");
+calculatorContainer.append(operatorContainer);
+
+let operators = ["+", "-", "*", "/"];
+
+operators.forEach((operator) => {
+  const button = document.createElement("button");
+  button.classList.add("operator-button");
+  button.textContent = operator;
+  operatorContainer.appendChild(button);
+});
+
+// Buttons For The Digits, Decimal, and Equals
 let digitContainer = document.createElement("div");
 digitContainer.setAttribute("id", "digit-container");
-body.appendChild(digitContainer);
+calculatorContainer.appendChild(digitContainer);
 
 const digits = "1234567890".split("");
 digits.forEach((digit) => {
@@ -117,38 +109,44 @@ decimal.classList.add("decimal");
 decimal.textContent = ".";
 digitContainer.appendChild(decimal);
 
-// The Display Where Numbers and Solutions Will Be Presented
-let display = document.createElement("div");
-display.setAttribute("id", "display");
-body.prepend(display);
+const equalButton = document.createElement("button");
+equalButton.classList.add("solution-button");
+equalButton.textContent = "=";
+digitContainer.appendChild(equalButton);
 
-let firstNumDiv = document.createElement("div");
-firstNumDiv.textContent = "";
-let selectedOperatorDiv = document.createElement("div");
-selectedOperatorDiv.textContent = "";
-let secondNumDiv = document.createElement("div");
-secondNumDiv.textContent = "";
-
-display.append(firstNumDiv, selectedOperatorDiv, secondNumDiv);
-
+// Function to Reset All Variables
+function resetVariables() {
+  firstNum = "";
+  secondNum = "";
+  selectedOperator = "";
+  isSecondNum = false;
+  isError = false;
+  previousCalc = false;
+  firstNumDiv.textContent = "";
+  secondNumDiv.textContent = "";
+  selectedOperatorDiv.textContent = "";
+}
 // Functions For Each Individual Event Handler
 function handleDigitEvent(digit) {
   if (isError) {
-    firstNumDiv.textContent = "";
-    selectedOperatorDiv.textContent = "";
-    secondNumDiv.textContent = "";
-    isError = false;
+    resetVariables();
   }
 
   if (!isSecondNum) {
+    if (firstNumDiv.textContent.length >= 10) {
+      return;
+    }
     if (previousCalc) {
       firstNumDiv.textContent = "";
-      firstNum = null;
+      firstNum = "";
       previousCalc = false;
     }
     firstNumDiv.textContent += digit;
     firstNum = firstNumDiv.textContent;
   } else {
+    if (secondNumDiv.textContent.length >= 10) {
+      return;
+    }
     secondNumDiv.textContent += digit;
     secondNum = secondNumDiv.textContent;
   }
@@ -156,45 +154,37 @@ function handleDigitEvent(digit) {
 
 function handleDecimalEvent(decimal) {
   if (isError || previousCalc) {
+    resetVariables();
     firstNumDiv.textContent = "0";
-    selectedOperatorDiv.textContent = "";
-    secondNumDiv.textContent = "";
-    isError = false;
     previousCalc = false;
-    firstHasDecimal = false;
-    secondHasDecimal = false;
   }
 
-  let currentDiv = !isSecondNum ? firstNumDiv : secondNumDiv;
-  let currentHasDecimal = !isSecondNum ? firstHasDecimal : secondHasDecimal;
+  let currentNumber = !isSecondNum ? firstNum : secondNum;
 
-  if (currentHasDecimal) {
+  if (currentNumber.includes(".")) {
     return;
   }
 
-  if (currentDiv.textContent === "") {
-    currentDiv.textContent = "0";
+  if (currentNumber === "") {
+    currentNumber = "0";
   }
 
-  currentDiv.textContent += decimal;
+  currentNumber += decimal;
 
   if (!isSecondNum) {
-    firstNum = currentDiv.textContent;
-    firstHasDecimal = true;
+    firstNum = currentNumber;
+    firstNumDiv.textContent = firstNum;
   } else {
-    secondNum = currentDiv.textContent;
-    secondHasDecimal = true;
+    secondNum = currentNumber;
+    secondNumDiv.textContent = secondNum;
   }
 }
 
 function handleOperatorEvent(operator) {
   if (isError) {
-    firstNumDiv.textContent = "";
-    selectedOperatorDiv.textContent = "";
-    secondNumDiv.textContent = "";
-    isError = false;
+    resetVariables();
   }
-  if (!firstNum) {
+  if (firstNum === "") {
     isError = true;
     firstNumDiv.textContent = "Invalid Format Used";
     return;
@@ -205,15 +195,7 @@ function handleOperatorEvent(operator) {
 }
 
 function handleClearAllEvent() {
-  firstNumDiv.textContent = "";
-  firstNum = null;
-  selectedOperatorDiv.textContent = "";
-  selectedOperator = null;
-  secondNumDiv.textContent = "";
-  secondNum = null;
-  isSecondNum = false;
-  firstHasDecimal = false;
-  secondHasDecimal = false;
+  resetVariables();
 }
 
 function handleClearEntryEvent() {
@@ -225,7 +207,7 @@ function handleClearEntryEvent() {
     }
   } else if (selectedOperator) {
     selectedOperatorDiv.textContent = "";
-    selectedOperator = null;
+    selectedOperator = "";
     isSecondNum = false;
   } else {
     firstNumDiv.textContent = firstNumDiv.textContent.slice(0, -1);
@@ -237,72 +219,69 @@ function handleClearEntryEvent() {
 }
 
 function handleSolveEvent() {
-  firstNum = Number(firstNum);
-  secondNum = Number(secondNum);
-
-  if (secondNum === 0 && selectedOperator === "/") {
+  if (selectedOperator === "") {
     isError = true;
-    firstNumDiv.textContent = "You CANNOT Divide By Zero!";
-    firstNum = null;
-    selectedOperatorDiv.textContent = "";
-    selectedOperator = null;
-    secondNumDiv.textContent = "";
-    secondNum = null;
-    isSecondNum = false;
-    firstHasDecimal = false;
-    secondHasDecimal = false;
+    firstNumDiv.textContent = "No Operator Selected";
     return;
-  } else if (!secondNum) {
+  }
+
+  if (Number(secondNum) === 0 && selectedOperator === "/") {
+    resetVariables();
+    isError = true;
+    firstNumDiv.textContent = "Cannot Divide By Zero";
+    return;
+  } else if (secondNum === "") {
+    resetVariables();
     isError = true;
     firstNumDiv.textContent = "Invalid Format Used";
-    firstNum = null;
-    selectedOperatorDiv.textContent = "";
-    selectedOperator = null;
-    secondNumDiv.textContent = "";
-    secondNum = null;
-    isSecondNum = false;
-    firstHasDecimal = false;
-    secondHasDecimal = false;
     return;
   }
 
   let solution =
     Math.round(operate(firstNum, selectedOperator, secondNum) * 1000) / 1000;
 
+  if (isNaN(solution)) {
+    firstNumDiv.textContent = "Invalid Calculation";
+    isError = true;
+    return;
+  }
+  if (solution.toString().length > 10) {
+    firstNumDiv.textContent = "Result Too Large!";
+    isError = true;
+    return;
+  }
+
   firstNumDiv.textContent = `${solution}`;
   firstNum = firstNumDiv.textContent;
   selectedOperatorDiv.textContent = "";
-  selectedOperator = null;
+  selectedOperator = "";
   secondNumDiv.textContent = "";
-  secondNum = null;
+  secondNum = "";
   isSecondNum = false;
-  firstHasDecimal = false;
-  secondHasDecimal = false;
   previousCalc = true;
 }
 
 // Event Listener For Keyboard Inputs
 document.addEventListener("keydown", (event) => {
   const digitKeys = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-  const decimalKey = ".";
-  const operatorKeys = ["+", "-", "*", "/"];
-  const clearEntryKey = "Backspace";
-  const clearAllKey = "Escape";
+  const operatorKeys = ["+", "-", "*", "x", "/"];
   const solveKey = ["=", "Enter"];
 
-  console.log(event.key);
   if (digitKeys.includes(event.key)) {
     handleDigitEvent(event.key);
-  } else if (decimalKey.includes(event.key)) {
+  } else if (event.key === ".") {
     handleDecimalEvent(event.key);
   } else if (operatorKeys.includes(event.key)) {
     handleOperatorEvent(event.key);
   } else if (solveKey.includes(event.key)) {
     handleSolveEvent();
-  } else if (clearAllKey.includes(event.key)) {
+  } else if (event.key === "Escape") {
     handleClearAllEvent();
-  } else if (clearEntryKey.includes(event.key)) {
+  } else if (event.key === "Backspace") {
     handleClearEntryEvent();
+  } else {
+    firstNumDiv.textContent = "Invalid Key Pressed";
+    isError = true;
   }
 });
 

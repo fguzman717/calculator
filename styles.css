@@ -1,0 +1,117 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f3f3f3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#calculator-container {
+  background-color: black;
+  padding: 20px;
+  width: 300px;
+  border-radius: 15px;
+  box-shadow: 10px 5px 5px rgb(75, 75, 75);
+}
+
+#display {
+  border: 1px solid rgb(46, 46, 46);
+  border-radius: 15px;
+  background-color: black;
+  padding: 10px;
+  min-height: 160px;
+  margin: auto;
+  color: white;
+  font-size: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#digit-container,
+#operator-container,
+#clear-container {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+#digit-container {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 20px;
+  justify-content: end;
+}
+
+#digit-container button.digits,
+#digit-container button.decimal {
+  grid-column: span 1;
+}
+
+#operator-container {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+#clear-container {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+button.digits,
+button.decimal,
+button.solution-button,
+button.operator-button {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  font-size: 25px;
+  margin: auto;
+}
+
+button.operator-button {
+  background-color: rgb(191, 189, 189);
+  color: black;
+  font-size: 30px;
+}
+
+button.clear-buttons {
+  font-size: 20px;
+}
+
+button {
+  padding: 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: rgb(37, 37, 37);
+  color: white;
+  transition: font-size 0.1s ease, transform 0.1s ease;
+}
+
+button:active {
+  font-size: 10px;
+  transform: scale(0.95);
+}
+
+button:hover {
+  background-color: #555;
+}
+
+button.solution-button {
+  background-color: rgb(14, 224, 14);
+  color: white;
+}
+
+button.solution-button:hover {
+  background-color: #00ff04;
+}
+
+button.clear-buttons {
+  background-color: #d63031;
+}
+
+button.clear-buttons:hover {
+  background-color: #e0412f;
+}
